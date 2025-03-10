@@ -1,0 +1,987 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load product_filters %}
+
+{% block style %}
+    <style>
+        .product-price span {
+            color: #c7c7c7;
+            text-decoration: line-through;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .quick-buy-btn {
+            background: #f55d2c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .quick-buy-btn:hover {
+            background: #f44336;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(245, 93, 44, 0.3);
+        }
+
+        .quick-buy-btn i {
+            margin-right: 5px;
+        }
+
+        .similar-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        .similar-item:hover {
+            background: #f8f9fa;
+        }
+
+        .similar-item:last-child {
+            border-bottom: none;
+        }
+
+        .similar-item-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .similar-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .similar-item-info {
+            flex: 1;
+        }
+
+        .similar-item-info h5 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #2b2f4c;
+        }
+
+        .price-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .price-info strong {
+            color: #f55d2c;
+            font-size: 16px;
+        }
+
+        .price-info .old-price {
+            color: #c7c7c7;
+            text-decoration: line-through;
+            font-size: 13px;
+        }
+
+        .price-info .discount {
+            background: #ffeee8;
+            color: #f55d2c;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .add-to-cart-btn {
+            background: #f55d2c;
+            color: #fff;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #f44336;
+            transform: translateY(-1px);
+        }
+
+        .add-to-cart-btn i {
+            margin-right: 4px;
+        }
+
+        .out-of-stock {
+            color: #dc3545;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .product-variants mb-4 {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .variant-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .size-selector, .color-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .size-selector label, .color-selector label {
+            font-weight: 600;
+        }
+
+        .size-buttons, .color-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .size-buttons input, .color-buttons input {
+            display: none;
+        }
+
+        .size-buttons label, .color-buttons label {
+            cursor: pointer;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .size-buttons label:hover, .color-buttons label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .variant-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .variant-price, .variant-stock {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .variant-price span, .variant-stock span {
+            font-weight: 600;
+        }
+
+        /* Variant Selection Styles */
+        .variant-options label {
+            font-weight: 500;
+        }
+
+        .size-buttons,
+        .color-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-check {
+            position: absolute;
+            clip: rect(0,0,0,0);
+            pointer-events: none;
+        }
+
+        .btn-check + label {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-check:checked + label {
+            background-color: #2b2f4c;
+            color: white;
+            border-color: #2b2f4c;
+        }
+
+        .btn-check:disabled + label {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Variant Details Styles */
+        .variant-details {
+            border: 1px solid rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+
+        .variant-price h4 {
+            color: #2b2f4c;
+            font-weight: 600;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .variant-details .row > div:not(:last-child) {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Variant Selection */
+        .variant-options {
+            margin-bottom: 1.5rem;
+        }
+
+        .variant-options label span {
+            font-size: 14px;
+            color: #2b2f4c;
+            font-weight: 500;
+        }
+
+        .size-buttons,
+        .color-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Variant Buttons */
+        .variant-btn {
+            padding: 8px 16px;
+            border: 1px solid #e4e4e4;
+            border-radius: 4px;
+            color: #2b2f4c;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .variant-btn:hover {
+            border-color: #2b2f4c;
+        }
+
+        .btn-check:checked + .variant-btn {
+            background: #2b2f4c;
+            color: white;
+            border-color: #2b2f4c;
+        }
+
+        /* Variant Messages */
+        .variant-message {
+            padding: 12px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .variant-message.error {
+            background: #fff5f5;
+            color: #dc3545;
+        }
+
+        /* Variant Details */
+        .variant-details {
+            margin-top: 1rem;
+        }
+
+        .variant-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .variant-price {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2b2f4c;
+        }
+
+        .stock-badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stock-badge.in-stock {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .stock-badge.out-of-stock {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .product-pricing {
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .price-range, .price-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .price-label {
+            font-size: 0.875rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #2b2f4c;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .price-value .currency {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .price-value .separator {
+            margin: 0 0.5rem;
+            color: #666;
+        }
+
+        .price-note {
+            font-size: 0.813rem;
+            color: #666;
+        }
+
+        .original-price {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .original-price .price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .discount-badge {
+            background: #fff0ee;
+            color: #f55d2c;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.813rem;
+            font-weight: 500;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .product-pricing {
+                padding: 1rem;
+            }
+            
+            .price-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        .price-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .price-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .price-title {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .variant-note {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .variant-note i {
+            margin-right: 4px;
+            color: #f55d2c;
+        }
+
+        .price-amount {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2b2f4c;
+        }
+
+        .original-price {
+            font-size: 16px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+
+        .discount-tag {
+            background: #ffeee8;
+            color: #f55d2c;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .price-amount {
+                font-size: 20px;
+            }
+            
+            .original-price {
+                font-size: 14px;
+            }
+        }
+
+        /* Common styles for both button types */
+        .add-cart-btn,
+        .add-variant-cart-btn {
+            background: #f55d2c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .add-cart-btn:hover,
+        .add-variant-cart-btn:hover {
+            background: #f44336;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(245, 93, 44, 0.3);
+        }
+
+        .add-cart-btn:disabled,
+        .add-variant-cart-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .add-cart-btn i,
+        .add-variant-cart-btn i {
+            margin-right: 5px;
+        }
+
+        /* Order button styles */
+        .order-btn {
+            background: #2b2f4c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .order-btn:hover {
+            background: #1e2238;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(43, 47, 76, 0.3);
+        }
+
+        .order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+    <div class="gambo-Breadcrumb">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'products:category' product.category.slug %}">{{ product.category.name }}</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="all-product-grid">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="product-dt-view">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4">
+                                <div id="sync1" class="owl-carousel owl-theme">
+                                    {% if product.primary_image %}
+                                    <div class="item">
+                                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}">
+                                    </div>
+                                    {% endif %}
+                                    {% for image in product.images.all %}
+                                        {% if not image.is_primary %}
+                                        <div class="item">
+                                            <img src="{{ image.image.url }}" alt="{{ product.name }}">
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div id="sync2" class="owl-carousel owl-theme" style="margin-top: 10px;">
+                                    {% for image in product.images.all %}
+                                        <div class="item">
+                                            <img src="{{ image.image.url }}" alt="{{ product.name }}">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-lg-8 col-md-8">
+                                <div class="product-dt-right">
+                                    <h2>{{ product.name }}</h2>
+                                    <div class="no-stock">
+                                        <p class="pd-no">SKU<span>{{ product.sku }}</span></p>
+                                        <p class="stock-qty">
+                                            {% if product.stock > 0 %}
+                                                Available<span>(In Stock)</span>
+                                            {% else %}
+                                                <span>(Out of Stock)</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+
+                                    {% if product.has_variants %}
+                                        <div class="product-variants mb-4">
+                                            {% if product.variants.all|length > 0 %}
+                                                <div class="variant-options">
+                                                    {% if product.variants.first.size %}
+                                                        <div class="size-selector mb-3">
+                                                            <label class="d-block mb-2">
+                                                                <span>Size</span>
+                                                                <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="size-buttons">
+                                                                {% for variant in product.variants.all|dictsort:"size"|unique:"size" %}
+                                                                    {% if variant.size %}
+                                                                        <input type="radio" 
+                                                                               name="size" 
+                                                                               id="size-{{ variant.size }}" 
+                                                                               class="btn-check variant-select" 
+                                                                               value="{{ variant.size }}"
+                                                                               data-type="size">
+                                                                        <label class="variant-btn" 
+                                                                               for="size-{{ variant.size }}">
+                                                                            {{ variant.get_size_display }}
+                                                                        </label>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+
+                                                    {% if product.variants.first.color %}
+                                                        <div class="color-selector mb-3">
+                                                            <label class="d-block mb-2">
+                                                                <span>Color</span>
+                                                                <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="color-buttons">
+                                                                {% for variant in product.variants.all|dictsort:"color"|unique:"color" %}
+                                                                    {% if variant.color %}
+                                                                        <input type="radio" 
+                                                                               name="color" 
+                                                                               id="color-{{ variant.color|slugify }}" 
+                                                                               class="btn-check variant-select" 
+                                                                               value="{{ variant.color }}"
+                                                                               data-type="color">
+                                                                        <label class="variant-btn" 
+                                                                               for="color-{{ variant.color|slugify }}">
+                                                                            {{ variant.color }}
+                                                                        </label>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+
+                                                <div id="variant-instructions" class="variant-message">
+                                                    <i class="fas fa-info-circle"></i> Please select size and color options
+                                                </div>
+
+                                                <div id="variant-details" class="variant-details" style="display: none;">
+                                                    <div class="variant-info">
+                                                        <div class="variant-price">
+                                                            ₹ <span id="variant-price"></span>
+                                                        </div>
+                                                        <div class="variant-stock">
+                                                            <span id="variant-stock" class="stock-badge"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                    <p class="pp-descp">{{ product.description }}</p>
+                                    <div class="product-group-dt">
+                                        <ul>
+                                            {% if product.has_variants %}
+                                                {% if product.variants.all|length > 0 %}
+                                                    <li class="price-display">
+                                                        <div class="price-range">
+                                                            <div class="price-header">
+                                                                <span class="price-title">Price Range</span>
+                                                                <div class="variant-note">
+                                                                    <i class="fas fa-info-circle"></i> Select options for final price
+                                                                </div>
+                                                            </div>
+                                                            <div class="price-amount">
+                                                                ₹{{ product.variants.first.selling_price }} - ₹{{ product.variants.last.selling_price }}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                {% endif %}
+                                            {% else %}
+                                                <li class="price-display">
+                                                    <div class="current-price">
+                                                        <div class="price-header">
+                                                            <span class="price-title">Price</span>
+                                                            {% if product.discount_percentage > 0 %}
+                                                                <span class="discount-tag">{{ product.discount_percentage }}% OFF</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="price-amount">
+                                                            ₹{{ product.selling_price }}
+                                                            {% if product.discount_percentage > 0 %}
+                                                                <span class="original-price">₹{{ product.original_price }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                        <ul class="gty-wish-share">
+                                            <li>
+                                                <div class="qty-product">
+                                                    <div class="quantity buttons_added">
+                                                        <input type="button" value="-" class="minus minus-btn">
+                                                        <input type="number" step="1" name="quantity" value="1" class="input-text qty text">
+                                                        <input type="button" value="+" class="plus plus-btn">
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <span class="like-icon {% if product.is_wishlisted %}liked{% endif %}" 
+                                                      title="wishlist" 
+                                                      data-product="{{ product.id }}"></span>
+                                            </li>
+                                        </ul>
+                                        <ul class="ordr-crt-share">
+                                            <li>
+                                                <button class="{% if product.has_variants %}add-variant-cart-btn{% else %}add-cart-btn{% endif %} hover-btn" 
+                                                        data-product="{{ product.id }}" 
+                                                        {% if product.has_variants %}disabled{% endif %}>
+                                                    <i class="uil uil-shopping-cart-alt"></i>
+                                                    Add to Cart
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="order-btn hover-btn" 
+                                                        {% if product.has_variants %}disabled{% endif %}>
+                                                    Order Now
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="pdp-details">
+                                        <ul>
+                                            <li>
+                                                <div class="pdp-group-dt">
+                                                    <div class="pdp-icon"><i class="uil uil-truck"></i></div>
+                                                    <div class="pdp-text-dt">
+                                                        <span>Fast Delivery</span>
+                                                        <p>Get your order delivered within 24-48 hours.</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="pdp-group-dt">
+                                                    <div class="pdp-icon"><i class="uil uil-shield-check"></i></div>
+                                                    <div class="pdp-text-dt">
+                                                        <span>100% Authentic Products</span>
+                                                        <p>We guarantee the authenticity of all our products.</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="pdp-group-dt">
+                                                    <div class="pdp-icon"><i class="uil uil-headphones"></i></div>
+                                                    <div class="pdp-text-dt">
+                                                        <span>24/7 Customer Support</span>
+                                                        <p>Get assistance anytime via phone or email.</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-12">
+                    <div class="pdpt-bg">
+                        <div class="pdpt-title">
+                            <h4>More Like This</h4>
+                        </div>
+                        <div class="pdpt-body scrollstyle_4">
+                            {% for product in similar_products %}
+                            <div class="similar-item">
+                                <a href="{% url 'products:detail' product.slug %}" class="similar-item-img">
+                                    {% if product.primary_image %}
+                                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}">
+                                    {% endif %}
+                                </a>
+                                <div class="similar-item-info">
+                                    <h5>{{ product.name }}</h5>
+                                    <div class="price-info">
+                                        <strong>₹{{ product.selling_price }}</strong>
+                                        {% if product.discount_percentage > 0 %}
+                                            <span class="old-price">₹{{ product.original_price }}</span>
+                                            <span class="discount">-{{ product.discount_percentage }}%</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if product.stock > 0 %}
+                                        <button class="add-to-cart-btn" data-product="{{ product.id }}">
+                                            <i class="uil uil-shopping-cart-alt"></i> Add
+                                        </button>
+                                    {% else %}
+                                        <span class="out-of-stock">Out of Stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-12">
+                    <div class="pdpt-bg">
+                        <div class="pdpt-title">
+                            <h4>Product Details</h4>
+                        </div>
+                        <div class="pdpt-body scrollstyle_4">
+                            <div class="pdct-dts-1">
+                                <div class="pdct-dt-step">
+                                    <h4>Description</h4>
+                                    <p>{{ product.description }}</p>
+                                </div>
+                                {% if product.additional_details %}
+                                    <div class="pdct-dt-step">
+                                        <h4>Additional Details</h4>
+                                        <p>{{ product.additional_details }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if product.brand %}
+                                <div class="pdct-dt-step">
+                                    <h4>Brand</h4>
+                                    <div class="product_attr">{{ product.brand }}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if product.is_free_shipping %}
+                                <div class="pdct-dt-step">
+                                    <h4>Shipping</h4>
+                                    <div class="product_attr">Free Shipping Available</div>
+                                </div>
+                                {% endif %}
+                            </div>			
+                        </div>					
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Featured Products Start -->
+<div class="section145">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-title-tt">
+                    <div class="main-title-left">
+                        <span>For You</span>
+                        <h2>Related Products</h2>
+                    </div>
+                    <a href="{% url 'products:category' product.category.slug %}" class="see-more-btn">See All</a>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="owl-carousel featured-slider owl-theme">
+                    {% for product in related_products %}
+                    <div class="item">
+                        <div class="product-item">
+                            <a href="{% url 'products:detail' product.slug %}" class="product-img">
+                                {% if product.primary_image %}
+                                    <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="https://placehold.co/400x400?text=No+Image" alt="{{ product.name }}">
+                                {% endif %}
+                                <div class="product-absolute-options">
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="offer-badge-1">{{ product.discount_percentage }}% off</span>
+                                    {% endif %}
+                                    <span class="like-icon" title="wishlist"></span>
+                                </div>
+                            </a>
+                            <div class="product-text-dt">
+                                <p>
+                                    {% if product.stock > 0 %}
+                                        Available<span>(In Stock)</span>
+                                    {% else %}
+                                        <span>(Out of Stock)</span>
+                                    {% endif %}
+                                </p>
+                                <h4>{{ product.name }}</h4>
+                                <div class="product-price">
+                                    ₹{{ product.selling_price }} 
+                                    {% if product.discount_percentage > 0 %}
+                                        <span>₹{{ product.original_price }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if product.stock > 0 %}
+                                    <button class="quick-buy-btn hover-btn w-100" data-product="{{ product.id }}">
+                                        <i class="uil uil-shopping-cart-alt"></i> Quick Buy
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Featured Products End -->
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'frontend/js/product-variants.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.featured-slider').owlCarousel({
+                items: 6,
+                loop: false,
+                margin: 10,
+                nav: true,
+                dots: false,
+                navText: ["<i class='uil uil-angle-left'></i>", "<i class='uil uil-angle-right'></i>"],
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    576: {
+                        items: 2
+                    },
+                    768: {
+                        items: 3
+                    },
+                    992: {
+                        items: 4
+                    },
+                    1200: {
+                        items: 6
+                    }
+                }
+            });
+        });
+
+        document.querySelector('.like-icon').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            fetch('/users/api/wishlist/toggle/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    product_id: '{{ product.id }}'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                } else {
+                    this.classList.toggle('liked');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: data.message,
+                        timer: 1500
+                    });
+                }
+            });
+        });
+
+        document.querySelectorAll('.quick-buy-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Add to cart with default quantity of 1
+                addToCart(this.dataset.product, 1);
+            });
+        });
+    </script>
+{% endblock %}
