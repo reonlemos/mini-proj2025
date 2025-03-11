@@ -10,6 +10,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -25,7 +26,7 @@ INSTALLED_APPS = [
     "orders",
     "wishlist",
     "offers",
-    "djstripe",
+    # "djstripe",
 ]
 
 MIDDLEWARE = [
@@ -114,5 +115,12 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/users/login/"
 
 STRIPE_LIVE_MODE = False
-DJSTRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_xxx')
-DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
+# DJSTRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_xxx')
+# DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
+
+JAZZMIN_SETTINGS = {
+    'site_header': "THRIFTO",
+    'site_brand': "thrift more, spend less",
+    # 'site_logo': "frontend/admin/images/logo2.png",
+    'copyright': " reon-shop.com"
+}

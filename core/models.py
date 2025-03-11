@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 CURRENCY_CHOICES = [
-    ("$", "Indian Rupee"),
+    ("₹", "Indian Rupee"),
 ]
 
 
@@ -18,7 +18,7 @@ class SiteSettings(models.Model):
     # Payment Settings
     paypal_client_id = models.CharField(max_length=255, null=True, blank=True)
     paypal_secret = models.CharField(max_length=255, null=True, blank=True)
-    currency = models.CharField(max_length=3, default="$", choices=CURRENCY_CHOICES)
+    currency = models.CharField(max_length=3, default="₹", choices=CURRENCY_CHOICES)
 
     # Email Settings
     smtp_host = models.CharField(max_length=255, null=True, blank=True)

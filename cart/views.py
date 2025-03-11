@@ -17,7 +17,7 @@ from decimal import Decimal
 import stripe
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from djstripe.models import APIKey
+# from djstripe.models import APIKey
 import json
 import logging
 from products.models import Product, ProductVariant

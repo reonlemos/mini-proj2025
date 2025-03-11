@@ -113,6 +113,12 @@
         $('.cart-close-btn, .minus-btn, .plus-btn').off();
     });
 </script>
-
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".cart-item-price").forEach(priceElement => {
+            priceElement.innerHTML = priceElement.innerHTML.replace("৳", "₹");
+        });
+    });
+</script>
 </body>
 </html>
