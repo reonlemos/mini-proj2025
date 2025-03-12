@@ -17,7 +17,7 @@
                     <tr>
                         <td>{{ product.product__name }}</td>
                         <td>{{ product.total_quantity }}</td>
-                        <td>{{ settings.currency }}{{ product.total_sales|floatformat:2 }}</td>
+                        <td>₹{{ product.total_sales|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

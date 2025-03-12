@@ -17,7 +17,7 @@
                     <tr>
                         <td>{{ sale.date|date:"Y-m-d" }}</td>
                         <td>{{ sale.total_orders }}</td>
-                        <td>{{ settings.currency }}{{ sale.total_sales|floatformat:2 }}</td>
+                        <td>₹{{ sale.total_sales|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -1,6 +1,6 @@
 from django.conf import settings
-# from djstripe.models import APIKey
-# from djstripe.enums import APIKeyType
+from djstripe.models import APIKey
+from djstripe.enums import APIKeyType
 import stripe
 
 
