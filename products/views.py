@@ -3,10 +3,13 @@ from django.views.generic import ListView, DetailView
 from django.db.models import Exists, OuterRef, Value
 from django.db import models
 from django.views.decorators.http import require_GET
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
 
 from categories.models import Category
 from wishlist.models import Wishlist
-from .models import Product, ProductVariant
+from .models import Product, ProductVariant, ProductReview
 
 
 class ProductListView(ListView):
@@ -162,3 +165,33 @@ def get_variant_details(request):
         })
     except ProductVariant.DoesNotExist:
         return JsonResponse({'error': 'Variant not found'}, status=404)
+
+
+@login_required
+def add_review(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        review_text = request.POST.get('review_text')
+        
+        # Check if user has already reviewed this product
+        existing_review = ProductReview.objects.filter(product=product, user=request.user).first()
+        
+        if existing_review:
+            # Update existing review
+            existing_review.rating = rating
+            existing_review.review_text = review_text
+            existing_review.save()
+            messages.success(request, 'Your review has been updated successfully!')
+        else:
+            # Create new review
+            ProductReview.objects.create(
+                product=product,
+                user=request.user,
+                rating=rating,
+                review_text=review_text
+            )
+            messages.success(request, 'Your review has been submitted successfully!')
+    
+    return redirect('products:detail', slug=slug)

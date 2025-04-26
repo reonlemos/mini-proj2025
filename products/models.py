@@ -2,6 +2,7 @@ from time import strftime
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
+from django.conf import settings
 
 from categories.models import Category
 from utils.common_utils import generate_file_name
@@ -197,3 +198,19 @@ class ProductVariant(TimeStampedModel):
         if self.color:
             variant_details.append(f"Color: {self.color}")
         return f"{self.product.name} ({', '.join(variant_details)})"
+
+
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='product_reviews')
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)], help_text='Rating from 1 to 5 stars')
+    review_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['product', 'user']  # One review per user per product
+
+    def __str__(self):
+        return f"{self.user.username}'s review for {self.product.name}"

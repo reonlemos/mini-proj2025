@@ -10,4 +10,5 @@ urlpatterns = [
     path('category/<slug:slug>/', views.ProductsByCategoryView.as_view(), name='category'),
     path('detail/<slug:slug>/', views.ProductDetailView.as_view(), name='detail'),
     path('api/variant/', views.get_variant_details, name='get_variant_details'),
+    path('<slug:slug>/review/', views.add_review, name='add_review'),
 ]

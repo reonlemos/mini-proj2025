@@ -849,6 +849,76 @@
                             </div>			
                         </div>					
                     </div>
+
+                    <!-- Reviews Section -->
+                    <div class="card card-static-2 mb-30">
+                        <div class="card-header">
+                            <h5>Customer Reviews</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Review Form -->
+                            {% if user.is_authenticated %}
+                                <div class="review-form mb-4">
+                                    <h6>Write a Review</h6>
+                                    <form method="post" action="{% url 'products:add_review' product.slug %}" class="review-form">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label>Your Rating</label>
+                                            <div class="star-rating">
+                                                {% for i in "54321" %}
+                                                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required>
+                                                    <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Your Review</label>
+                                            <textarea name="review_text" class="form-control" rows="4" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    Please <a href="{% url 'users:login' %}?next={{ request.path }}">login</a> to write a review.
+                                </div>
+                            {% endif %}
+
+                            <!-- Reviews List -->
+                            <div class="reviews-list">
+                                {% if product.reviews.all %}
+                                    {% for review in product.reviews.all %}
+                                        <div class="review-item">
+                                            <div class="review-header">
+                                                <div class="reviewer-info">
+                                                    <h6>
+                                                        {% if review.user.name %}
+                                                            {{ review.user.name }}
+                                                        {% elif review.user.username %}
+                                                            {{ review.user.username }}
+                                                        {% else %}
+                                                            Anonymous
+                                                        {% endif %}
+                                                    </h6>
+                                                    <div class="review-date">{{ review.created_at|date:"F d, Y" }}</div>
+                                                </div>
+                                                <div class="review-rating">
+                                                    {% for i in "12345" %}
+                                                        <i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="review-content">
+                                                <p>{{ review.review_text }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
