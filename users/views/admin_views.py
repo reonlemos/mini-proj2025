@@ -22,7 +22,7 @@ from categories.models import Category
 from core.models import CURRENCY_CHOICES
 from orders.models import Order, OrderItem
 from offers.models import Offer
-from products.models import Product, ProductImage, ProductVariant
+from products.models import Product, ProductImage, ProductVariant, Bid
 from users.models import User
 from core.models import SiteSettings
 
@@ -407,8 +407,19 @@ def admin_product_view(request, product_id):
         ),
         id=product_id,
     )
+    bids = product.bids.select_related('user').order_by('-amount')
+    if request.method == 'POST':
+        bid_id = request.POST.get('winner_bid_id')
+        if bid_id:
+            # Unset previous winners
+            product.bids.update(is_winner=False)
+            # Set new winner
+            Bid.objects.filter(id=bid_id, product=product).update(is_winner=True)
+            messages.success(request, "Winner selected successfully!")
+            return redirect('users:admin_product_view', product_id=product.id)
     context = {
         "product": product,
+        "bids": bids,
     }
     return render(request, "users/admin/products/detail.html", context)
 

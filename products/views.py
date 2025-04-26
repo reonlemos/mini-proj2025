@@ -2,14 +2,15 @@ from django.http import Http404, JsonResponse
 from django.views.generic import ListView, DetailView
 from django.db.models import Exists, OuterRef, Value
 from django.db import models
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+from django.utils.decorators import method_decorator
 
 from categories.models import Category
 from wishlist.models import Wishlist
-from .models import Product, ProductVariant, ProductReview
+from .models import Product, ProductVariant, ProductReview, Bid
 
 
 class ProductListView(ListView):
@@ -106,6 +107,12 @@ class ProductDetailView(DetailView):
             .exclude(id__in=[p.id for p in similar_products])[:8]
         )  # Limit to 8 products
 
+        # Bidding context
+        highest_bid = self.object.bids.order_by('-amount').first()
+        all_bids = self.object.bids.select_related('user').order_by('-amount')
+        context["highest_bid"] = highest_bid
+        context["all_bids"] = all_bids
+
         context["similar_products"] = similar_products
         context["related_products"] = related_products
         return context
@@ -195,3 +202,25 @@ def add_review(request, slug):
             messages.success(request, 'Your review has been submitted successfully!')
     
     return redirect('products:detail', slug=slug)
+
+
+@method_decorator(login_required, name='dispatch')
+class PlaceBidView(DetailView):
+    model = Product
+    template_name = "products/detail.html"
+    context_object_name = "product"
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        amount = request.POST.get('bid_amount')
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid bid amount.")
+            return redirect('products:detail', slug=self.object.slug)
+        if amount < float(self.object.selling_price):
+            messages.error(request, "Bid must be at least the product's selling price.")
+            return redirect('products:detail', slug=self.object.slug)
+        Bid.objects.create(product=self.object, user=request.user, amount=amount)
+        messages.success(request, "Your bid has been placed!")
+        return redirect('products:detail', slug=self.object.slug)

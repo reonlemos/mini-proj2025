@@ -214,3 +214,17 @@ class ProductReview(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s review for {self.product.name}"
+
+
+class Bid(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='bids')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    is_winner = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-amount', '-created']
+
+    def __str__(self):
+        return f"{self.user} bid {self.amount} on {self.product}"
