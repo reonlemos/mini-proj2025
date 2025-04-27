@@ -124,3 +124,9 @@ JAZZMIN_SETTINGS = {
     # 'site_logo': "frontend/admin/images/logo2.png",
     'copyright': " reon-shop.com"
 }
+
+# Import local settings at the end to override defaults
+try:
+    from .local_settings import *
+except ImportError:
+    pass

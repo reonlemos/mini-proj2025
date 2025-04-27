@@ -9,9 +9,11 @@ class User(AbstractUser):
     username = None
     first_name = None
     last_name = None
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True)
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=20, blank=False, null=False)
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    stripe_customer_id = models.CharField(max_length=100, blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "phone"]

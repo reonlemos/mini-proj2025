@@ -3,6 +3,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 from categories.models import Category
 from utils.common_utils import generate_file_name
@@ -98,6 +100,8 @@ class Product(TimeStampedModel):
         default=False, help_text=_("Whether this product has different variants")
     )
 
+    ownership_count = models.PositiveIntegerField(default=1, help_text=_('Number of times this product has been owned (1 = first owner, 2 = second hand, etc.)'))
+
     class Meta:
         ordering = ["-created"]
         verbose_name = _("Product")
@@ -137,6 +141,17 @@ class Product(TimeStampedModel):
         if self.has_variants:
             return sum(variant.stock for variant in self.variants.all())
         return self.stock
+
+    @property
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if not reviews:
+            return 0
+        return sum(review.rating for review in reviews) / len(reviews)
+
+    def get_rating_count(self, rating):
+        """Get the count of reviews for a specific rating"""
+        return self.reviews.filter(rating=rating).count()
 
 
 class ProductImage(TimeStampedModel):
@@ -222,9 +237,33 @@ class Bid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     is_winner = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
+    auction_end_time = models.DateTimeField(null=True, blank=True)
+    payment_processed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-amount', '-created']
 
     def __str__(self):
         return f"{self.user} bid {self.amount} on {self.product}"
+
+
+class PaymentTransaction(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    )
+
+    bid = models.OneToOneField('Bid', on_delete=models.CASCADE, related_name='payment')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    error_message = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Payment for {self.bid.product.name} - {self.amount}"
+
+    class Meta:
+        ordering = ['-created_at']

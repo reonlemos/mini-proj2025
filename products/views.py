@@ -7,10 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.utils import timezone
+from datetime import timedelta
 
 from categories.models import Category
 from wishlist.models import Wishlist
 from .models import Product, ProductVariant, ProductReview, Bid
+from .services import PaymentService
 
 
 class ProductListView(ListView):
@@ -212,15 +215,74 @@ class PlaceBidView(DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+        
+        # Check if there's already a winner
+        if self.object.bids.filter(is_winner=True).exists():
+            messages.error(request, "This auction has already ended.")
+            return redirect('products:detail', slug=self.object.slug)
+            
         amount = request.POST.get('bid_amount')
         try:
             amount = float(amount)
         except (TypeError, ValueError):
             messages.error(request, "Invalid bid amount.")
             return redirect('products:detail', slug=self.object.slug)
+            
         if amount < float(self.object.selling_price):
             messages.error(request, "Bid must be at least the product's selling price.")
             return redirect('products:detail', slug=self.object.slug)
-        Bid.objects.create(product=self.object, user=request.user, amount=amount)
+            
+        # Check if this is the first bid
+        is_first_bid = not self.object.bids.exists()
+        
+        # Create the bid
+        bid = Bid.objects.create(
+            product=self.object,
+            user=request.user,
+            amount=amount
+        )
+        
+        # If this is the first bid, set the auction end time
+        if is_first_bid:
+            bid.auction_end_time = timezone.now() + timedelta(days=5)
+            bid.save()
+            
         messages.success(request, "Your bid has been placed!")
         return redirect('products:detail', slug=self.object.slug)
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        
+        # Get the highest bid
+        highest_bid = product.bids.order_by('-amount').first()
+        
+        # Check if auction has ended
+        if highest_bid and highest_bid.auction_end_time and timezone.now() >= highest_bid.auction_end_time:
+            # Select winner if not already selected
+            if not highest_bid.is_winner:
+                # Unset any previous winners
+                product.bids.update(is_winner=False)
+                # Set new winner
+                highest_bid.is_winner = True
+                highest_bid.save()
+                
+                # Process payment
+                if not highest_bid.payment_processed:
+                    success, message = PaymentService.process_payment(highest_bid)
+                    if success:
+                        highest_bid.payment_processed = True
+                        highest_bid.save()
+                        messages.success(
+                            self.request,
+                            f"Congratulations! You have won the auction for {product.name}!"
+                        )
+                    else:
+                        messages.error(
+                            self.request,
+                            f"Payment processing failed: {message}"
+                        )
+        
+        context["highest_bid"] = highest_bid
+        context["all_bids"] = product.bids.select_related('user').order_by('-amount')
+        return context

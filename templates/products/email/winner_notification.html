@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f55d2c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #f55d2c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Congratulations! You Won!</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ user_name }},</p>
+            
+            <p>We're thrilled to inform you that you have won the auction for <strong>{{ product_name }}</strong>!</p>
+            
+            <p>Your winning bid amount: <strong>₹{{ amount }}</strong></p>
+            
+            <p>The payment has been automatically processed from your registered payment method.</p>
+            
+            <p>Your order will be processed and shipped to your registered address shortly.</p>
+            
+            <p>If you have any questions or need assistance, please don't hesitate to contact our customer support team.</p>
+            
+            <p>Thank you for participating in our auction!</p>
+            
+            <p>Best regards,<br>Your Auction Team</p>
+        </div>
+    </div>
+</body>
+</html> 

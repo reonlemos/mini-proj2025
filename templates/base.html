@@ -21,7 +21,6 @@
     <link href="{% static 'frontend/css/step-wizard.css' %}" rel="stylesheet">
 
     <!-- Vendor Stylesheets --> 
-     <!-- reon   -->
     <link href="{% static 'frontend/css/all.min.css' %}" rel="stylesheet">  
     <link href="{% static 'frontend/css/owl.carousel.css' %}" rel="stylesheet">
     <link href="{% static 'frontend/css/owl.theme.default.min.css' %}" rel="stylesheet">
@@ -43,7 +42,6 @@
     </style>
 
     {% block style %}{% endblock %}
-
 </head>
 
 <body data-auth="{{ request.user.is_authenticated|lower }}">
@@ -55,7 +53,6 @@
     </div>
 </div>
 <!-- end per-loader -->
-
 
 {% include 'includes/header.html' %}
 
@@ -89,7 +86,6 @@
 
 {% include 'includes/footer.html' %}
 
-
 <!-- Javascript -->
 <script src="{% static 'frontend/js/jquery-3.3.1.min.js' %}"></script>
 <script src="{% static 'frontend/js/bootstrap.bundle.min.js' %}"></script>
@@ -100,13 +96,12 @@
 <script src="{% static 'frontend/js/offset_overlay.js' %}"></script>
 <script src="{% static 'frontend/js/night-mode.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script src="{% static 'frontend/js/custom.js' %}"></script>
 <script src="{% static 'frontend/js/frontend.js' %}"></script>
+<script src="{% static 'frontend/js/countdown.js' %}"></script>
+<script src="{% static 'frontend/js/cart.js' %}"></script>
 
 {% block script %}{% endblock %}
-
-<script src="{% static 'frontend/js/cart.js' %}"></script>
 
 <script>
     // Remove any existing cart-related jQuery event handlers
