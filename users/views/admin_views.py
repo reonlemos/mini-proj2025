@@ -360,6 +360,7 @@ def admin_product_edit(request, product_id):
         product.slug = slugify(request.POST.get("name"))
         product.has_variants = request.POST.get("has_variants") == "on"
         product.is_free_shipping = request.POST.get("is_free_shipping") == "on"
+        product.ownership_status = request.POST.get("ownership_status")
         
         # Handle primary image
         uploaded_primary_image = request.FILES.get("primary_image")

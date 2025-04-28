@@ -24,6 +24,11 @@ class Product(TimeStampedModel):
         ML = 4, "ml"
         UNIT = 5, "unit"
 
+    class OwnershipStatusChoices(models.TextChoices):
+        FIRST_OWNER = "first", _("First Owner")
+        SECOND_HAND = "second", _("Second Hand")
+        THIRD_HAND = "third", _("Third Hand")
+
     name = models.CharField(max_length=255, verbose_name=_("Product name"))
     description = models.TextField(help_text=_("Main product description"))
     additional_details = models.TextField(
@@ -101,6 +106,12 @@ class Product(TimeStampedModel):
     )
 
     ownership_count = models.PositiveIntegerField(default=1, help_text=_('Number of times this product has been owned (1 = first owner, 2 = second hand, etc.)'))
+    ownership_status = models.CharField(
+        max_length=10,
+        choices=OwnershipStatusChoices.choices,
+        default=OwnershipStatusChoices.FIRST_OWNER,
+        help_text=_("Current ownership status of the product")
+    )
 
     class Meta:
         ordering = ["-created"]

@@ -91,6 +91,8 @@ class ProductDetailView(DetailView):
         obj = super().get_object(queryset)
         if obj is None:
             raise Http404("Product not found")
+        # Refresh the object from the database to get the latest data
+        obj.refresh_from_db()
         obj.is_wishlisted = Wishlist.objects.filter(
             user=self.request.user, product=obj
         ).exists() if self.request.user.is_authenticated else False

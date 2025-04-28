@@ -80,6 +80,16 @@
                                         <label class="form-label">Minimum Stock Level</label>
                                         <input type="number" class="form-control" name="minimum_stock" value="{{ product.minimum_stock }}">
                                     </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Ownership Status*</label>
+                                        <select class="form-control" name="ownership_status" required>
+                                            {% for value, label in product.OwnershipStatusChoices.choices %}
+                                                <option value="{{ value }}" {% if value == product.ownership_status %}selected{% endif %}>
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <!-- Description -->

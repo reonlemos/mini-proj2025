@@ -76,6 +76,14 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label>Ownership Status*</label>
+                                <select class="form-control" name="ownership_status" required>
+                                    <option value="first">First Owner</option>
+                                    <option value="second">Second Hand</option>
+                                    <option value="third">Third Hand</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Product Images*</label>
                                 <input type="file" class="form-control" name="images" multiple accept="image/*" required>
                                 <small class="form-text text-muted">First image will be set as primary image</small>

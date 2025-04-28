@@ -707,14 +707,12 @@
                                 <div class="product-dt-right">
                                     <div class="product-name-badge">
                                         <h2 style="margin-bottom:0;">{{ product.name }}</h2>
-                                        {% if product.ownership_count == 1 %}
-                                            <span class="badge badge-success ownership-badge">FIRST OWNED</span>
-                                        {% elif product.ownership_count == 2 %}
-                                            <span class="badge badge-warning ownership-badge">SECOND OWNERSHIP</span>
-                                        {% elif product.ownership_count == 3 %}
-                                            <span class="badge badge-danger ownership-badge">THIRD OWNERSHIP</span>
-                                        {% else %}
-                                            <span class="badge badge-secondary ownership-badge">{{ product.ownership_count|add:"th"|upper }} OWNERSHIP</span>
+                                        {% if product.ownership_status == 'first' %}
+                                            <span class="badge badge-success ownership-badge">FIRST OWNER</span>
+                                        {% elif product.ownership_status == 'second' %}
+                                            <span class="badge badge-warning ownership-badge">SECOND HAND</span>
+                                        {% elif product.ownership_status == 'third' %}
+                                            <span class="badge badge-danger ownership-badge">THIRD HAND</span>
                                         {% endif %}
                                     </div>
                                     <div class="no-stock">
